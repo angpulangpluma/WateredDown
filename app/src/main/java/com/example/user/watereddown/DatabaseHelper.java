@@ -7,6 +7,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.ContactsContract;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -50,6 +51,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         super(context, DB_NAME, null, DB_VERSION);
         this.mContxt = context;
         DB_PATH = context.getApplicationInfo().dataDir + "/databases/";
+        try{
+            openDatabase();
+            onCreate(wdDb);
+        } catch (Exception e){
+            Log.w("error", e.toString());
+        }
     }
 
     public void createDatabase() throws IOException {
@@ -76,12 +83,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 mInput.close();
                 String TAG = "DatabaseHelper";
             } catch(IOException ioe){
-                throw new Error("Error creating database");
+//                throw new Error("Error creating database");
+                Log.w("error", ioe.toString());
             }
         }
     }
 
-    public void openDatabaseRead() throws SQLException{
+    public void openDatabase() throws SQLException{
         String myPath = DB_PATH + DB_NAME;
         wdDb = SQLiteDatabase.openDatabase(myPath, null, SQLiteDatabase.OPEN_READWRITE);
     }
@@ -214,11 +222,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-
+        sqLiteDatabase.execSQL(CREATE_USER_TABLE);
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
+    public void onUpgrade(SQLiteDatabase db, int i, int i1) {
+        //Drop User Table if exist
+        db.execSQL(DROP_USER_TABLE);
+
+        // Create tables again
+        onCreate(db);
 
     }
 }
