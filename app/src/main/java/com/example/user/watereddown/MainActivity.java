@@ -10,7 +10,12 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
+
+import com.dropbox.core.DbxRequestConfig;
+import com.dropbox.core.v2.DbxClientV2;
+import com.dropbox.core.v2.users.FullAccount;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +29,11 @@ public class MainActivity extends AppCompatActivity {
     private List<User> listFiles;
     private FileRecyclerAdapter filesRecyclerAdapter;
     private DatabaseHelper dbHelper;
+
+    private static final String ACCESS_TOKEN =
+            "I9h5pIu_C2AAAAAAAAAAX-7E5iZmUqhT3n7Jo8MQ7M3c2fyzV6tyMQsdmecbwAoO";
+
+//    private Drop
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
         dbHelper = new DatabaseHelper(activity);
 
         getData();
+        initDropbox();
     }
 
     private void getData(){
@@ -90,7 +101,27 @@ public class MainActivity extends AppCompatActivity {
         }.execute();
     }
 
+    private void initDropbox(){
 
+        new AsyncTask<Void, Void, Void>(){
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                DbxRequestConfig config = new DbxRequestConfig("DrpBxWithEncryption", "en_US");
+                DbxClientV2 client = new DbxClientV2(config, ACCESS_TOKEN);
+
+                try{
+                    FullAccount account = client.users().getCurrentAccount();
+//            System.out.println(account.getName().getDisplayName());
+                    Log.w("success", account.getName().getDisplayName());
+                } catch(Exception e){
+                    Log.w("error", e.toString());
+                }
+                return null;
+            }
+        }.execute();
+
+    }
 
 
 
