@@ -13,6 +13,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 
+import com.dropbox.core.DbxException;
 import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.ListFolderResult;
@@ -28,9 +29,9 @@ public class MainActivity extends AppCompatActivity {
 
     private AppCompatActivity activity = MainActivity.this;
     private RecyclerView recyclerViewFiles;
-    private List<User> listFiles;
+    private List<DBxFile> listFiles;
     private FileRecyclerAdapter filesRecyclerAdapter;
-    private DatabaseHelper dbHelper;
+//    private DatabaseHelper dbHelper;
     private DropboxManager drpBxManager;
 
 //    private Drop
@@ -76,12 +77,12 @@ public class MainActivity extends AppCompatActivity {
         recyclerViewFiles.setItemAnimator(new DefaultItemAnimator());
         recyclerViewFiles.setHasFixedSize(true);
         recyclerViewFiles.setAdapter(filesRecyclerAdapter);
-        dbHelper = new DatabaseHelper(activity);
+//        dbHelper = new DatabaseHelper(activity);
 
         drpBxManager = new DropboxManager("I9h5pIu_C2AAAAAAAAAAX-7E5iZmUqhT3n7Jo8MQ7M3c2fyzV6tyMQsdmecbwAoO", "DrpBxWithEncryption");
 
-        getData();
         initDropbox();
+        getData();
     }
 
     private void getData(){
@@ -90,9 +91,19 @@ public class MainActivity extends AppCompatActivity {
             @Override
             protected Void doInBackground(Void... params) {
                 listFiles.clear();
-                dbHelper.openDatabase();
-                listFiles.addAll(dbHelper.getAllUser());
-                dbHelper.close();
+//                dbHelper.openDatabase();
+//                listFiles.addAll(dbHelper.getAllUser());
+//                dbHelper.close();
+                drpBxManager.init();
+                try {
+                    FullAccount account = drpBxManager.getAccount();
+                    Log.w("success", account.getName().getDisplayName());
+                    List<DBxFile> list = drpBxManager.getFullListOfFiles("");
+                    if (list.size()>0) listFiles.addAll(list);
+                } catch (DbxException e) {
+                    Log.w("error", e.toString());
+                }
+//                drpBxManager.close();
                 return null;
             }
 
@@ -120,17 +131,17 @@ public class MainActivity extends AppCompatActivity {
                     FullAccount account = drpBxManager.getAccount();
                     Log.w("success", account.getName().getDisplayName());
 
-                    ListFolderResult result = drpBxManager.getListOfFiles("");
-                    while(true){
-                        for(Metadata metadata : result.getEntries()){
-//                            System.out.println(metadata.getPathLower());
-                            Log.w("list", metadata.getPathLower());
-                        }
-
-                        if (!result.getHasMore())
-                            break;
-                    }
-
+//                    ListFolderResult result = drpBxManager.getListOfFiles("");
+//                    while(true){
+//                        for(Metadata metadata : result.getEntries()){
+////                            System.out.println(metadata.getPathLower());
+//                            Log.w("list", metadata.getPathLower());
+//                        }
+//
+//                        if (!result.getHasMore())
+//                            break;
+//                    }
+//                drpBxManager.close();
                 } catch(Exception e){
                     Log.w("error", e.toString());
                 }
