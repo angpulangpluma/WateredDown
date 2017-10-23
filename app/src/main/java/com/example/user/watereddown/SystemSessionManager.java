@@ -3,6 +3,7 @@ package com.example.user.watereddown;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import java.util.HashMap;
 
@@ -32,6 +33,8 @@ public class SystemSessionManager {
     }
 
     public void createUserSession (String userName) {
+
+        Log.w("new user", userName);
 
         editor.putString(LOGIN_USER_NAME, userName);
         editor.putBoolean(IS_USER_LOGGED_IN, true);
@@ -65,33 +68,35 @@ public class SystemSessionManager {
 
     public boolean checkLogin() {
 
+        Log.w("check login", "here");
+
         if(!this.isUserLoggedIn()) {
 
+            Log.w("check login", "no");
+
             Intent i = new Intent(_context, LoginActivity.class);
-
             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
             _context.startActivity(i);
 
             return true;
         }
+
+        Log.w("check login", "yes");
 
         return false;
     }
 
     public void logoutUser() {
 
+        Log.w("logout user", "yes!");
+
         editor.clear();
         editor.commit();
 
         Intent i = new Intent(_context, LoginActivity.class);
-
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
         _context.startActivity(i);
     }
 

@@ -309,6 +309,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         private final String mEmail;
         private final String mPassword;
+        private boolean isSuccess = false;
 
         UserLoginTask(String email, String password) {
             mEmail = email;
@@ -317,7 +318,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         @Override
         protected Boolean doInBackground(Void... params) {
-//             TODO: attempt authentication against a network service.
 
             try {
                 dbHelper.createDatabase();
@@ -329,6 +329,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 String[] pieces = credential.split(":");
                 if (pieces[0].equals(mEmail)) {
                     // Account exists, return true if the password matches.
+                    isSuccess = true;
+                    sysSessManager.createUserSession(mEmail);
                     return pieces[1].equals(mPassword);
                 }
             }
@@ -338,6 +340,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             u.setEmail(mEmail);
             u.setPassword(mPassword);
             dbHelper.addUser(u);
+            if (!isSuccess) sysSessManager.createUserSession(mEmail);
             return true;
         }
 
@@ -368,5 +371,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
     }
+
+//    private void registerUser(String name){
+//        sysSessManager.createUserSession(name);
+//    }
 }
 
