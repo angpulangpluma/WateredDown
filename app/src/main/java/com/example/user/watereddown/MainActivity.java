@@ -15,6 +15,8 @@ import android.view.View;
 
 import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.v2.DbxClientV2;
+import com.dropbox.core.v2.files.ListFolderResult;
+import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.users.FullAccount;
 
 import java.util.ArrayList;
@@ -117,6 +119,18 @@ public class MainActivity extends AppCompatActivity {
 //            System.out.println(account.getName().getDisplayName());
                     FullAccount account = drpBxManager.getAccount();
                     Log.w("success", account.getName().getDisplayName());
+
+                    ListFolderResult result = drpBxManager.getListOfFiles("");
+                    while(true){
+                        for(Metadata metadata : result.getEntries()){
+//                            System.out.println(metadata.getPathLower());
+                            Log.w("list", metadata.getPathLower());
+                        }
+
+                        if (!result.getHasMore())
+                            break;
+                    }
+
                 } catch(Exception e){
                     Log.w("error", e.toString());
                 }

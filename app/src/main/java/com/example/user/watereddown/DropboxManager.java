@@ -2,6 +2,7 @@ package com.example.user.watereddown;
 
 import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.v2.DbxClientV2;
+import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.users.FullAccount;
 
 /**
@@ -30,6 +31,10 @@ public class DropboxManager {
 
     public void close(){
         this.client = null;
+    }
+
+    public ListFolderResult getListOfFiles(String path) throws com.dropbox.core.DbxException{
+        return client.files().listFolder(path);
     }
 
 }
