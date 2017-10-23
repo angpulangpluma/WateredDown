@@ -45,13 +45,13 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<FileRecyclerAdapte
 
     public class FileViewHolder extends RecyclerView.ViewHolder {
 
-        public AppCompatTextView textViewName;
+//        public AppCompatTextView textViewName;
         public AppCompatTextView textViewEmail;
         public AppCompatTextView textViewPassword;
 
         public FileViewHolder(View view) {
             super(view);
-            textViewName = (AppCompatTextView) view.findViewById(R.id.textViewName);
+//            textViewName = (AppCompatTextView) view.findViewById(R.id.textViewName);
             textViewEmail = (AppCompatTextView) view.findViewById(R.id.textViewEmail);
             textViewPassword = (AppCompatTextView) view.findViewById(R.id.textViewPassword);
         }
