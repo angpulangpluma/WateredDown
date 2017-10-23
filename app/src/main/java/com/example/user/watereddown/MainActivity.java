@@ -29,9 +29,7 @@ public class MainActivity extends AppCompatActivity {
     private List<User> listFiles;
     private FileRecyclerAdapter filesRecyclerAdapter;
     private DatabaseHelper dbHelper;
-
-    private static final String ACCESS_TOKEN =
-            "I9h5pIu_C2AAAAAAAAAAX-7E5iZmUqhT3n7Jo8MQ7M3c2fyzV6tyMQsdmecbwAoO";
+    private DropboxManager drpBxManager;
 
 //    private Drop
 
@@ -63,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
 //                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
 //                        .setAction("Action", null).show();
              sysSessManager.logoutUser();
+             drpBxManager.close();
             }
         });
 
@@ -76,6 +75,8 @@ public class MainActivity extends AppCompatActivity {
         recyclerViewFiles.setHasFixedSize(true);
         recyclerViewFiles.setAdapter(filesRecyclerAdapter);
         dbHelper = new DatabaseHelper(activity);
+
+        drpBxManager = new DropboxManager("I9h5pIu_C2AAAAAAAAAAX-7E5iZmUqhT3n7Jo8MQ7M3c2fyzV6tyMQsdmecbwAoO", "DrpBxWithEncryption");
 
         getData();
         initDropbox();
@@ -107,12 +108,14 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             protected Void doInBackground(Void... voids) {
-                DbxRequestConfig config = new DbxRequestConfig("DrpBxWithEncryption", "en_US");
-                DbxClientV2 client = new DbxClientV2(config, ACCESS_TOKEN);
+                drpBxManager.init();
+//                DbxRequestConfig config = new DbxRequestConfig("DrpBxWithEncryption", "en_US");
+//                DbxClientV2 client = new DbxClientV2(config, ACCESS_TOKEN);
 
                 try{
-                    FullAccount account = client.users().getCurrentAccount();
+//                    FullAccount account = client.users().getCurrentAccount();
 //            System.out.println(account.getName().getDisplayName());
+                    FullAccount account = drpBxManager.getAccount();
                     Log.w("success", account.getName().getDisplayName());
                 } catch(Exception e){
                     Log.w("error", e.toString());
