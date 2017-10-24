@@ -5,9 +5,15 @@ import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
+import com.dropbox.core.v2.files.WriteMode;
 import com.dropbox.core.v2.users.FullAccount;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -20,6 +26,7 @@ public class DropboxManager {
     private String ID;
 
     private DbxClientV2 client;
+
     public DropboxManager(String tken, String id){
         this.ACCESS_TOKEN = tken;
         this.ID = id;
@@ -66,6 +73,18 @@ public class DropboxManager {
         }
 
         return files;
+    }
+
+    public void uploadFileToDropBox(String file, String path)
+            throws com.dropbox.core.DbxException, FileNotFoundException,
+            IOException{
+        File f = new File(file);
+        FileInputStream in = new FileInputStream(f);
+        FileMetadata metadata = client.files().uploadBuilder(
+        path + f.getName())
+                .withMode(WriteMode.ADD)
+                .withClientModified(new Date(f.lastModified()))
+                .uploadAndFinish(in);
     }
 
 }

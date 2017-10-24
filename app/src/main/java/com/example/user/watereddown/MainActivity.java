@@ -1,7 +1,15 @@
 package com.example.user.watereddown;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.ContentResolver;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -12,6 +20,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 
 import com.dropbox.core.DbxException;
@@ -20,11 +29,24 @@ import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.users.FullAccount;
+import com.nbsp.materialfilepicker.ui.FilePickerActivity;
 
+import org.apache.commons.io.IOUtils;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.os.Environment.DIRECTORY_DOCUMENTS;
+
 public class MainActivity extends AppCompatActivity {
+
+//    private final int READ_REQUEST_CODE = 42;
 
     private SystemSessionManager sysSessManager;
 
@@ -40,6 +62,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+
         sysSessManager = new SystemSessionManager(getApplicationContext());
         if(sysSessManager.checkLogin())
             finish();
@@ -53,8 +77,9 @@ public class MainActivity extends AppCompatActivity {
         fa.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+                selectFile();
             }
         });
 
@@ -158,6 +183,132 @@ public class MainActivity extends AppCompatActivity {
             }
         }.execute();
 
+    }
+
+    private void selectFile(){
+//        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+//        intent.addCategory(Intent.CATEGORY_OPENABLE);
+//        intent.setType("*/*");
+//        startActivityForResult(intent, READ_REQUEST_CODE);
+        Intent intent = new Intent(this, FilePickerActivity.class);
+        intent.putExtra(FilePickerActivity.ARG_CLOSEABLE, true);
+        startActivityForResult(intent, 1);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+        super.onActivityResult(requestCode, resultCode, resultData);
+
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+            Log.w("file", resultData.getStringExtra(FilePickerActivity.RESULT_FILE_PATH));
+            File f = new File(resultData.getStringExtra(FilePickerActivity.RESULT_FILE_PATH));
+            new UploadFiletoDropbox().execute(f.getAbsolutePath(), "/");
+        }
+//        if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+//            Uri uri = null;
+//            if (resultData != null) {
+//                uri = resultData.getData();
+//                try {
+//                    String result = getRealPathFromURI(uri);
+//                    Log.w("result", result);
+//                } catch (Exception e){
+//                    String error = e.getLocalizedMessage();
+//                    Log.w("error", error);
+//                }
+//                Log.w("result", result);
+//                try {
+//                    File f = new File(getRealPathFromURI(uri));
+//                    if(f.exists())
+//                        Log.w("file", f.getPath());
+//                    new UploadFiletoDropbox().execute(f.getAbsolutePath(), "/");
+//                } catch(Exception e){
+//                    Log.w("error", e.getMessage());
+//                }
+    }
+
+//    }
+
+//    private String getFileExtFromURI(Uri contentUri){
+////        String ext = "";
+//
+////        if (contentUri.toString().contains("."))
+////            ext = contentUri.toString()
+////                    .substring(contentUri.toString().lastIndexOf("."));
+////        ext = contentUri.
+//        return getContentResolver().getType(contentUri);
+//    }
+
+//    private String getRealPathFromURI(Uri contentUri)
+//        throws IOException, NullPointerException {
+//        Log.w("uri", contentUri.toString());
+//        String result = "";
+//        String ext = getFileExtFromURI(contentUri);
+////        Log.w("ext", ext);
+//        File f = new File(
+//                Environment.getExternalStoragePublicDirectory(DIRECTORY_DOCUMENTS),
+//                "input");
+//        InputStream in = getContentResolver().openInputStream(contentUri);
+//        OutputStream out = new FileOutputStream(f);
+//        if (in!=null)
+//            IOUtils.copy(in, out);
+//        else throw new NullPointerException("cannot copy file");
+//        result = f.getPath();
+////            String[] proj = { MediaStore.Images.Media.DATA };
+////            Cursor cursor = getContentResolver().query(contentUri,  proj, null, null, null);
+////            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+////            cursor.moveToFirst();
+////        } finally {
+////            if (cursor != null) {
+////                cursor.close();
+////            }
+////        result = cursor.getString(column_index);
+////        cursor.close();
+//        return result;
+////        }
+//    }
+
+    private class UploadFiletoDropbox extends AsyncTask<String, Void, Integer> {
+
+        transient ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
+        String fileUri, filePath;
+
+        @Override
+        protected void onPreExecute() {
+            this.progressDialog.setMessage("Uploading file to server...");
+            this.progressDialog.show();
+        }
+
+        @Override
+        protected Integer doInBackground(String... strings) {
+            //put code to upload file through dropbox here
+            fileUri = strings[0];
+            filePath = strings[1];
+            Log.w("file", fileUri);
+            Log.w("path", filePath);
+            drpBxManager.init();
+            try{
+                drpBxManager.uploadFileToDropBox(fileUri, filePath);
+            } catch (Exception e){
+                Log.w("error", e.getMessage());
+            }
+            return null;
+//            return savePatientInfo();
+        }
+
+        @Override
+        protected void onPostExecute(Integer aInt) {
+            super.onPostExecute(aInt);
+            if (this.progressDialog.isShowing()) {
+                this.progressDialog.dismiss();
+            }
+
+//            Intent intent = new Intent(UpdatePatientRecordActivity.this, ViewPatientActivity.class);
+//            intent.putExtra("sys", getIntent().getSerializableExtra("sys"));
+//            intent.putExtra("patientId", patientId);
+//            startActivity(intent);
+//            finish();
+
+        }
     }
 
 
