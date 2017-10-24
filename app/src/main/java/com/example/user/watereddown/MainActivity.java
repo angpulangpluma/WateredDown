@@ -12,6 +12,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 
 import com.dropbox.core.DbxException;
 import com.dropbox.core.DbxRequestConfig;
@@ -65,6 +66,14 @@ public class MainActivity extends AppCompatActivity {
 //                        .setAction("Action", null).show();
              sysSessManager.logoutUser();
              drpBxManager.close();
+            }
+        });
+
+        Button bRefresh = (Button) findViewById(R.id.refresh_btn);
+        bRefresh.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                getData();
             }
         });
 
