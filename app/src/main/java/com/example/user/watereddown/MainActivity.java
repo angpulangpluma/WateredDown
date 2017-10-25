@@ -1,9 +1,12 @@
 package com.example.user.watereddown;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -12,6 +15,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -31,9 +35,11 @@ import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.users.FullAccount;
 import com.nbsp.materialfilepicker.ui.FilePickerActivity;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -156,26 +162,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             protected Void doInBackground(Void... voids) {
                 drpBxManager.init();
-//                DbxRequestConfig config = new DbxRequestConfig("DrpBxWithEncryption", "en_US");
-//                DbxClientV2 client = new DbxClientV2(config, ACCESS_TOKEN);
 
                 try{
-//                    FullAccount account = client.users().getCurrentAccount();
-//            System.out.println(account.getName().getDisplayName());
+
                     FullAccount account = drpBxManager.getAccount();
                     Log.w("success", account.getName().getDisplayName());
 
-//                    ListFolderResult result = drpBxManager.getListOfFiles("");
-//                    while(true){
-//                        for(Metadata metadata : result.getEntries()){
-////                            System.out.println(metadata.getPathLower());
-//                            Log.w("list", metadata.getPathLower());
-//                        }
-//
-//                        if (!result.getHasMore())
-//                            break;
-//                    }
-//                drpBxManager.close();
                 } catch(Exception e){
                     Log.w("error", e.toString());
                 }
@@ -204,68 +196,8 @@ public class MainActivity extends AppCompatActivity {
             File f = new File(resultData.getStringExtra(FilePickerActivity.RESULT_FILE_PATH));
             new UploadFiletoDropbox().execute(f.getAbsolutePath(), "/");
         }
-//        if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-//            Uri uri = null;
-//            if (resultData != null) {
-//                uri = resultData.getData();
-//                try {
-//                    String result = getRealPathFromURI(uri);
-//                    Log.w("result", result);
-//                } catch (Exception e){
-//                    String error = e.getLocalizedMessage();
-//                    Log.w("error", error);
-//                }
-//                Log.w("result", result);
-//                try {
-//                    File f = new File(getRealPathFromURI(uri));
-//                    if(f.exists())
-//                        Log.w("file", f.getPath());
-//                    new UploadFiletoDropbox().execute(f.getAbsolutePath(), "/");
-//                } catch(Exception e){
-//                    Log.w("error", e.getMessage());
-//                }
     }
 
-//    }
-
-//    private String getFileExtFromURI(Uri contentUri){
-////        String ext = "";
-//
-////        if (contentUri.toString().contains("."))
-////            ext = contentUri.toString()
-////                    .substring(contentUri.toString().lastIndexOf("."));
-////        ext = contentUri.
-//        return getContentResolver().getType(contentUri);
-//    }
-
-//    private String getRealPathFromURI(Uri contentUri)
-//        throws IOException, NullPointerException {
-//        Log.w("uri", contentUri.toString());
-//        String result = "";
-//        String ext = getFileExtFromURI(contentUri);
-////        Log.w("ext", ext);
-//        File f = new File(
-//                Environment.getExternalStoragePublicDirectory(DIRECTORY_DOCUMENTS),
-//                "input");
-//        InputStream in = getContentResolver().openInputStream(contentUri);
-//        OutputStream out = new FileOutputStream(f);
-//        if (in!=null)
-//            IOUtils.copy(in, out);
-//        else throw new NullPointerException("cannot copy file");
-//        result = f.getPath();
-////            String[] proj = { MediaStore.Images.Media.DATA };
-////            Cursor cursor = getContentResolver().query(contentUri,  proj, null, null, null);
-////            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-////            cursor.moveToFirst();
-////        } finally {
-////            if (cursor != null) {
-////                cursor.close();
-////            }
-////        result = cursor.getString(column_index);
-////        cursor.close();
-//        return result;
-////        }
-//    }
 
     private class UploadFiletoDropbox extends AsyncTask<String, Void, Integer> {
 
@@ -281,10 +213,16 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected Integer doInBackground(String... strings) {
             //put code to upload file through dropbox here
+            checkPermissions(getApplicationContext());
             fileUri = strings[0];
             filePath = strings[1];
             Log.w("file", fileUri);
             Log.w("path", filePath);
+//            createFileDuplicate(
+//                    Environment.getExternalStoragePublicDirectory(DIRECTORY_DOCUMENTS)
+//                            .toString(),
+//                    FilenameUtils.getBaseName(fileUri)+"_new",
+//                    fileUri);
             drpBxManager.init();
             try{
                 drpBxManager.uploadFileToDropBox(fileUri, filePath);
@@ -292,7 +230,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.w("error", e.getMessage());
             }
             return null;
-//            return savePatientInfo();
         }
 
         @Override
@@ -302,13 +239,72 @@ public class MainActivity extends AppCompatActivity {
                 this.progressDialog.dismiss();
             }
 
-//            Intent intent = new Intent(UpdatePatientRecordActivity.this, ViewPatientActivity.class);
-//            intent.putExtra("sys", getIntent().getSerializableExtra("sys"));
-//            intent.putExtra("patientId", patientId);
-//            startActivity(intent);
-//            finish();
 
         }
+    }
+
+    private File createFileDuplicate(String path, String newname, String oldfile){
+//        fileUri = strings[0];
+//        filePath = strings[1];
+//        Log.w("file", fileUri);
+//        Log.w("path", filePath);
+        checkPermissions(this);
+        File f = null;
+        InputStream in;
+        OutputStream out;
+        boolean isFileUnlocked = false;
+        try {
+            f = new File(path, newname + "." +
+                    FilenameUtils.getExtension(oldfile));
+            if(f.createNewFile()) {
+                Log.w("file?", "yes");
+                in = new FileInputStream(new File(oldfile));
+                out = new FileOutputStream(f);
+                if (IOUtils.copy(in, out)>-1) {
+                    Log.w("copy?", "yes");
+                    out.close();
+                    in.close();
+                    if (f.canRead()) {
+                        Log.w("exists?", "yes");
+                        try {
+                            long lastmod = f.lastModified();
+                            Log.w("last modified", Long.toString(lastmod));
+                            org.apache.commons.io.FileUtils.touch(f);
+                            isFileUnlocked = true;
+                        } catch (IOException e) {
+                            //                            isFileUnlocked = false;
+                            Log.w("error", e.getMessage());
+                        }
+                    } else Log.w("exists?", "no");
+                } else Log.w("copy?", "no");
+            } else {
+                f = null;
+                Log.w("file?", "no");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return f;
+    }
+
+    private void checkPermissions(Context context){
+        int readStuff = ContextCompat.checkSelfPermission(context,
+                Manifest.permission.READ_EXTERNAL_STORAGE);
+        int writeStuff = ContextCompat.checkSelfPermission(context,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE);
+//        Log.w("read?", Integer.toString(readStuff));
+//        Log.w("write?", Integer.toString(writeStuff));
+        //for read stuff
+        if(readStuff == PackageManager.PERMISSION_GRANTED)
+            Log.w("read?", "yes");
+        else if(readStuff == PackageManager.PERMISSION_DENIED)
+            Log.w("read?", "no");
+
+        //for write stuff
+        if(writeStuff == PackageManager.PERMISSION_GRANTED)
+            Log.w("write?", "yes");
+        else if(writeStuff == PackageManager.PERMISSION_DENIED)
+            Log.w("write?", "no");
     }
 
 
