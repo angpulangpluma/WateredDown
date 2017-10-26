@@ -70,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
 
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
+        Log.w("sys", Boolean.toString(getIntent().getSerializableExtra("sys")!=null));
         sysSessManager = new SystemSessionManager(getApplicationContext());
         if(sysSessManager.checkLogin())
             finish();
@@ -218,17 +219,18 @@ public class MainActivity extends AppCompatActivity {
             filePath = strings[1];
             Log.w("file", fileUri);
             Log.w("path", filePath);
-//            createFileDuplicate(
-//                    Environment.getExternalStoragePublicDirectory(DIRECTORY_DOCUMENTS)
-//                            .toString(),
-//                    FilenameUtils.getBaseName(fileUri)+"_new",
-//                    fileUri);
-            drpBxManager.init();
-            try{
-                drpBxManager.uploadFileToDropBox(fileUri, filePath);
-            } catch (Exception e){
-                Log.w("error", e.getMessage());
-            }
+            File f = createFileDuplicate(
+                    Environment.getExternalStoragePublicDirectory(DIRECTORY_DOCUMENTS)
+                            .toString(),
+                    FilenameUtils.getBaseName(fileUri)+"_new",
+                    fileUri);
+            encryptFile(f);
+//            drpBxManager.init();
+//            try{
+//                drpBxManager.uploadFileToDropBox(fileUri, filePath);
+//            } catch (Exception e){
+//                Log.w("error", e.getMessage());
+//            }
             return null;
         }
 
@@ -241,6 +243,10 @@ public class MainActivity extends AppCompatActivity {
 
 
         }
+    }
+
+    private void encryptFile(File f){
+//        file_aes
     }
 
     private File createFileDuplicate(String path, String newname, String oldfile){
