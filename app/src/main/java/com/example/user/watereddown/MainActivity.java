@@ -246,7 +246,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void encryptFile(File f){
-//        file_aes
+        file_aes master = new file_aes((aes)getIntent().getSerializableExtra("sys"));
+        master.encryptFile(f);
     }
 
     private File createFileDuplicate(String path, String newname, String oldfile){
@@ -262,11 +263,14 @@ public class MainActivity extends AppCompatActivity {
         try {
             f = new File(path, newname + "." +
                     FilenameUtils.getExtension(oldfile));
-            if(f.createNewFile()) {
+            if(!f.exists()) {
+                if (f.createNewFile())
+                    Log.w("file?", "new!");
+            } else{
                 Log.w("file?", "yes");
                 in = new FileInputStream(new File(oldfile));
                 out = new FileOutputStream(f);
-                if (IOUtils.copy(in, out)>-1) {
+                if (IOUtils.copy(in, out) > -1) {
                     Log.w("copy?", "yes");
                     out.close();
                     in.close();
@@ -283,10 +287,12 @@ public class MainActivity extends AppCompatActivity {
                         }
                     } else Log.w("exists?", "no");
                 } else Log.w("copy?", "no");
-            } else {
-                f = null;
-                Log.w("file?", "no");
             }
+                //            }
+//            } else {
+//                f = null;
+//                Log.w("file?", "no");
+//            }
         } catch (IOException e) {
             e.printStackTrace();
         }
