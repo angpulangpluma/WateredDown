@@ -62,15 +62,21 @@ public class MainActivity extends AppCompatActivity {
     private FileRecyclerAdapter filesRecyclerAdapter;
 //    private DatabaseHelper dbHelper;
     private DropboxManager drpBxManager;
+    private file_aes master;
 
 //    private Drop
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+//        master = new file_aes((aes)getIntent().getSerializableExtra("sys"));
+        master = new file_aes(cryptoInit(new File("crypto.dat")));
+
+//        cryptoInit(new File("crypto.dat"));
+
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
-        Log.w("sys", Boolean.toString(getIntent().getSerializableExtra("sys")!=null));
+//        Log.w("sys", Boolean.toString(getIntent().getSerializableExtra("sys")!=null));
         sysSessManager = new SystemSessionManager(getApplicationContext());
         if(sysSessManager.checkLogin())
             finish();
@@ -188,6 +194,25 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, 1);
     }
 
+    private byte[] read(File file) throws IOException{
+        byte[] buffer = new byte[(int) file.length()];
+        InputStream ios = null;
+        try{
+            ios = new FileInputStream(file);
+            if(ios.read(buffer)==-1){
+                throw new IOException(
+                        "EOF reached while trying to read the whole file.");
+            }
+        } finally{
+            try {
+                if (ios != null) ios.close();
+            } catch (IOException e){
+                Log.w("error", e.getMessage());
+            }
+        }
+        return buffer;
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         super.onActivityResult(requestCode, resultCode, resultData);
@@ -225,6 +250,7 @@ public class MainActivity extends AppCompatActivity {
                     FilenameUtils.getBaseName(fileUri)+"_new",
                     fileUri);
             encryptFile(f);
+//            decryptFile(f);
 //            drpBxManager.init();
 //            try{
 //                drpBxManager.uploadFileToDropBox(fileUri, filePath);
@@ -246,8 +272,72 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void encryptFile(File f){
-        file_aes master = new file_aes((aes)getIntent().getSerializableExtra("sys"));
         master.encryptFile(f);
+    }
+
+    private void decryptFile(File f){
+        master.decryptFile(f);
+    }
+
+    private aes cryptoInit(File set) {
+        checkPermissions(this);
+//        File set = null;
+//        OutputStream in = null;
+//        DataOutputStream dos = null;
+        set = createFile(this, "crypto.dat");
+        aes master = null;
+        if(set!=null){
+            try{
+                master = new aes();
+                master.loadKey(set);
+//                master.saveKey(master.getKey(), set);
+//                in = new FileOutputStream(set);
+//                dos = new DataOutputStream(in);
+//                dos.write(master.getKey().getEncoded());
+            } catch(Exception e){
+                Log.w("error", e.getMessage());
+            }
+        }
+
+        return master;
+    }
+
+    private File createFile(Context con, String newname){
+        checkPermissions(this);
+        File f = null;
+        InputStream in;
+        OutputStream out;
+        boolean isFileUnlocked = false;
+        try {
+            f = con.getFileStreamPath(newname);
+            if (!f.exists()) {
+                if (f.createNewFile()) {
+                    Log.w("file?", "new");
+                    in = new FileInputStream(f);
+                    out = new FileOutputStream(f);
+                    if (IOUtils.copy(in, out)>0) {
+                        Log.w("copy?", "yes");
+                        out.close();
+                        in.close();
+                        if (f.canRead()) {
+                            Log.w("read?", "yes");
+                            try {
+                                long lastmod = f.lastModified();
+                                Log.w("last modified", Long.toString(lastmod));
+                                org.apache.commons.io.FileUtils.touch(f);
+                                isFileUnlocked = true;
+                            } catch (IOException e) {
+                                //                            isFileUnlocked = false;
+                                Log.w("error", e.getMessage());
+                            }
+                        } else Log.w("read?", "no");
+                    } else Log.w("copy?", "no");
+                } else Log.w("file?", "no");
+            } else Log.w("exists?", "yes");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return f;
     }
 
     private File createFileDuplicate(String path, String newname, String oldfile){
