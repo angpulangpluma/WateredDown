@@ -250,7 +250,7 @@ public class MainActivity extends AppCompatActivity {
                     FilenameUtils.getBaseName(fileUri)+"_new",
                     fileUri);
             encryptFile(f);
-//            decryptFile(f);
+            decryptFile(f);
 //            drpBxManager.init();
 //            try{
 //                drpBxManager.uploadFileToDropBox(fileUri, filePath);
@@ -341,6 +341,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private File createFileDuplicate(String path, String newname, String oldfile){
+        //TODO: Test this function!
 //        fileUri = strings[0];
 //        filePath = strings[1];
 //        Log.w("file", fileUri);
@@ -360,10 +361,13 @@ public class MainActivity extends AppCompatActivity {
                 Log.w("file?", "yes");
                 in = new FileInputStream(new File(oldfile));
                 out = new FileOutputStream(f);
-                if (IOUtils.copy(in, out) > -1) {
-                    Log.w("copy?", "yes");
-                    out.close();
+                Log.w("file length", Long.toString(new File(oldfile).length()));
+                byte[] buffer = new byte[(int)new File(oldfile).length()];
+                if (in.read(buffer)!=-1){
+                    out.write(buffer);
                     in.close();
+                    out.flush();
+                    out.close();
                     if (f.canRead()) {
                         Log.w("exists?", "yes");
                         try {
@@ -377,6 +381,23 @@ public class MainActivity extends AppCompatActivity {
                         }
                     } else Log.w("exists?", "no");
                 } else Log.w("copy?", "no");
+//                if (IOUtils.copy(in, out) > -1) {
+//                    Log.w("copy?", "yes");
+//                    out.close();
+//                    in.close();
+//                    if (f.canRead()) {
+//                        Log.w("exists?", "yes");
+//                        try {
+//                            long lastmod = f.lastModified();
+//                            Log.w("last modified", Long.toString(lastmod));
+//                            org.apache.commons.io.FileUtils.touch(f);
+//                            isFileUnlocked = true;
+//                        } catch (IOException e) {
+//                            //                            isFileUnlocked = false;
+//                            Log.w("error", e.getMessage());
+//                        }
+//                    } else Log.w("exists?", "no");
+//                } else Log.w("copy?", "no");
             }
                 //            }
 //            } else {
