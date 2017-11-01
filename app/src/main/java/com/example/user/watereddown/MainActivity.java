@@ -364,17 +364,18 @@ public class MainActivity extends AppCompatActivity {
                     Log.w("copy?", "yes");
                     out.close();
                     in.close();
+                    Log.w("file length", Long.toString(f.length()));
                     if (f.canRead()) {
                         Log.w("exists?", "yes");
-                        try {
+                        //try {
                             long lastmod = f.lastModified();
                             Log.w("last modified", Long.toString(lastmod));
-                            org.apache.commons.io.FileUtils.touch(f);
-                            isFileUnlocked = true;
-                        } catch (IOException e) {
+//                            org.apache.commons.io.FileUtils.touch(f);
+//                            isFileUnlocked = true;
+                        //} catch (IOException e) {
                             //                            isFileUnlocked = false;
-                            Log.w("error", e.getMessage());
-                        }
+                            //Log.w("error", e.getMessage());
+                        //}
                     } else Log.w("exists?", "no");
                 } else Log.w("copy?", "no");
             }
