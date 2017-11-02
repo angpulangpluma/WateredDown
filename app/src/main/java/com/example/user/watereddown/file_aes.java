@@ -105,21 +105,32 @@ public class file_aes {
         SecretKey k = filealgo.getKey();
         Log.w("file length", Long.toString(file.length()));
 //        Log.w("decrypt file", file.getPath());
-//        try{
-//            FileInputStream in = new FileInputStream(file);
-//            cp.init(Cipher.DECRYPT_MODE, k);
-//            byte[] buffer = new byte[(int)file.length()];
-//            byte[] encfile = null;
-//            if (in.read(buffer)!=-1){
-////                encfile = cp.doFinal(buffer);
-////                FileOutputStream os = new FileOutputStream(file);
-////                os.write(encfile);
-////                Log.w("encrypt file", "done");
-////                os.close();
-//            } else Log.w("decrypt file", "failed");
-//        } catch(Exception ex){
-//            Log.w("error", ex.getMessage());
-//        }
+        try{
+            FileInputStream in = new FileInputStream(file);
+            cp.init(Cipher.DECRYPT_MODE, k);
+            Log.w("file length", Long.toString(file.length()));
+            byte[] buffer = new byte[(int)file.length()];
+            Log.w("buffer length", Integer.toString(buffer.length));
+            byte[] encfile = null;
+            if (in.read(buffer)!=-1){
+//                char[] data = new char[buffer.length];
+//                for(int i=0; i<data.length; i++) {
+//                    data[i] = Byte.valueOf(buffer[i]).toString().charAt(0);
+//                }
+//                Log.w("data", String.valueOf(data));
+                in.close();
+                Log.w("file length", Long.toString(file.length()));
+                encfile = cp.doFinal(buffer);
+                Log.w("decfile length", Integer.toString(encfile.length));
+                FileOutputStream os = new FileOutputStream(file);
+                os.write(encfile);
+                Log.w("decrypt file", "done");
+                Log.w("file length", Long.toString(file.length()));
+                os.close();
+            } else Log.w("decrypt file", "failed");
+        } catch(Exception ex){
+            Log.w("error", ex.getMessage());
+        }
         try{
             FileInputStream in = new FileInputStream(file);
             cp.init(Cipher.DECRYPT_MODE, k);

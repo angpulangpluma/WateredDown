@@ -250,7 +250,7 @@ public class MainActivity extends AppCompatActivity {
                     FilenameUtils.getBaseName(fileUri)+"_new",
                     fileUri);
             encryptFile(f);
-//            decryptFile(f);
+            decryptFile(f);
 //            drpBxManager.init();
 //            try{
 //                drpBxManager.uploadFileToDropBox(fileUri, filePath);
