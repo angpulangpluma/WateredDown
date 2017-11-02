@@ -15,6 +15,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.GeneralSecurityException;
+
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
@@ -29,14 +31,16 @@ public class file_aes {
 
     public file_aes(){
         filealgo = new aes();
-//        filealgo.setKey();
-//        filealgo.setCipher();
+        filealgo.setKey();
+        filealgo.setCipher();
+        filealgo.setIV();
 //        ciph = filealgo.getCipher();
     }
 
     public file_aes(aes enc){
         this.filealgo = enc;
         filealgo.setCipher();
+        filealgo.setIV();
 //        this.ciph = filealgo.getCipher();
     }
 
@@ -52,7 +56,7 @@ public class file_aes {
         SecretKey k = filealgo.getKey();
         try{
             FileInputStream in = new FileInputStream(file);
-            cp.init(Cipher.ENCRYPT_MODE, k);
+            cp.init(Cipher.ENCRYPT_MODE, k, filealgo.getIvParamSpec());
             Log.w("file length", Long.toString(file.length()));
             byte[] buffer = new byte[(int)file.length()];
             Log.w("buffer length", Integer.toString(buffer.length));
@@ -77,7 +81,7 @@ public class file_aes {
                 Log.w("file length", Long.toString(file.length()));
                 os.close();
             } else Log.w("encrypt file", "failed");
-        } catch(Exception ex){
+        } catch(GeneralSecurityException | IOException ex){
             Log.w("error", ex.getMessage());
         }
 //        try{
@@ -132,7 +136,7 @@ public class file_aes {
 //        }
         try{
             FileInputStream in = new FileInputStream(file);
-            cp.init(Cipher.DECRYPT_MODE, k);
+            cp.init(Cipher.DECRYPT_MODE, k, filealgo.getIvParamSpec());
             Log.w("file length", Long.toString(file.length()));
             byte[] buffer = new byte[(int)file.length()];
             Log.w("buffer length", Integer.toString(buffer.length));
@@ -158,7 +162,7 @@ public class file_aes {
                 os.close();
                 Log.w("file length", Long.toString(file.length()));
             } else Log.w("decrypt file", "failed");
-        } catch(Exception ex){
+        } catch(GeneralSecurityException | IOException ex){
             Log.w("error", ex.getMessage());
         }
 //        try{

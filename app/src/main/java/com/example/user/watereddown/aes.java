@@ -24,6 +24,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
@@ -33,6 +34,7 @@ import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.codec.DecoderException;
@@ -53,17 +55,20 @@ public class aes {
     private SecretKey secretkey;
     private Cipher cipher;
     private static final String ALGO = "AES";
+    private IvParameterSpec ivParamSpec;
 
     public aes(SecretKey key){
         this.AES_Key_Size = 256;
         this.secretkey = key;
         this.key = secretkey.getEncoded();
+        this.setIV();
     }
     //
     public aes(){
         this.AES_Key_Size = 256;
         this.setKey();
         this.setCipher();
+        this.setIV();
     }
 
     public void setKey(){
@@ -96,6 +101,13 @@ public class aes {
         }
     }
 
+    public void setIV(){
+        byte[] iv = new byte[cipher.getBlockSize()];
+        SecureRandom random = new SecureRandom();
+        random.nextBytes(iv);
+        ivParamSpec = new IvParameterSpec(iv);
+    }
+
     public Cipher getCipher(){
         return this.cipher;
     }
@@ -103,6 +115,8 @@ public class aes {
     public SecretKey getKey(){
         return this.secretkey;
     }
+
+    public IvParameterSpec getIvParamSpec(){ return this.ivParamSpec; }
 
     /*
     * @author stuinzuri
