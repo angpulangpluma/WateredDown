@@ -71,16 +71,17 @@ public class aes {
             KeyGenerator kgen = KeyGenerator.getInstance("AES");
             kgen.init(AES_Key_Size);
             SecretKey aeskey = kgen.generateKey();
-            key = aeskey.getEncoded();
+            secretkey = new SecretKeySpec(aeskey.getEncoded(), "AES");
+            key = secretkey.getEncoded();
 //            String temp = android.util.Base64.encodeToString(key, DEFAULT);
-            char[] ch = new char[key.length];
-            for(int i=0; i<ch.length; i++) {
-                ch[i] = Byte.valueOf(key[i]).toString().charAt(0);
-                key[i] = (byte)ch[i];
-            }
-            String temp = android.util.Base64.encodeToString(key, DEFAULT);
-            secretkey = new SecretKeySpec(android.util.Base64.decode(temp, DEFAULT), "AES");
-            key = android.util.Base64.decode(temp, DEFAULT);
+//            char[] ch = new char[key.length];
+//            for(int i=0; i<ch.length; i++) {
+//                ch[i] = Byte.valueOf(key[i]).toString().charAt(0);
+//                key[i] = (byte)ch[i];
+//            }
+//            String temp = android.util.Base64.encodeToString(key, DEFAULT);
+//            secretkey = new SecretKeySpec(android.util.Base64.decode(temp, DEFAULT), "AES");
+//            key = secretkey.getEncoded();
 //            secretkey = new SecretKeySpec(key, "AES");
         } catch (Exception e){
             e.printStackTrace();
