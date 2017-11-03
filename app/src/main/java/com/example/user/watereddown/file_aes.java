@@ -160,6 +160,7 @@ public class file_aes {
                 os.write(encfile);
                 Log.w("decrypt file", "done");
                 os.close();
+                filealgo.resetIV();
                 Log.w("file length", Long.toString(file.length()));
             } else Log.w("decrypt file", "failed");
         } catch(GeneralSecurityException | IOException ex){

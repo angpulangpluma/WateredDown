@@ -51,6 +51,7 @@ public class aes {
 
     private final int AES_Key_Size;
     private byte[] key;
+    private byte[] vector;
 
     private SecretKey secretkey;
     private Cipher cipher;
@@ -106,6 +107,11 @@ public class aes {
         SecureRandom random = new SecureRandom();
         random.nextBytes(iv);
         ivParamSpec = new IvParameterSpec(iv);
+        vector = iv;
+    }
+
+    public void resetIV(){
+        ivParamSpec = new IvParameterSpec(vector);
     }
 
     public Cipher getCipher(){
