@@ -1,8 +1,4 @@
-package com.dlsu.getbetter.getbetter.cryptoGB;
-
-/**
- * Created by YING LOPEZ on 9/28/2017.
- */
+package com.example.user.watereddown;
 
 import android.util.Log;
 
