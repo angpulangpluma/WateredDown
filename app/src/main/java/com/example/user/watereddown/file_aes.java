@@ -62,6 +62,7 @@ public class file_aes {
                 in.close();
                 Log.w("file length", Long.toString(file.length()));
                 encfile = cp.doFinal(buffer);
+                Log.w("encrypted file length", Integer.toString(encfile.length));
 //                data = new char[encfile.length];
 //                for(int i=0; i<data.length; i++) {
 //                    data[i] = Byte.valueOf(encfile[i]).toString().charAt(0);
@@ -104,6 +105,7 @@ public class file_aes {
                 in.close();
                 Log.w("file length", Long.toString(file.length()));
                 encfile = cp.doFinal(buffer);
+                Log.w("decrypted file length", Integer.toString(encfile.length));
                 //
 //                data = new char[encfile.length];
 //                for(int i=0; i<data.length; i++) {
