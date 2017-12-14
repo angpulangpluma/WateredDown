@@ -263,27 +263,28 @@ public class MainActivity extends AppCompatActivity {
                 fin.close();
                 fos.close();
 
-                File f = createFileDuplicate(
+                File f1 = createFileDuplicate(
                     Environment.getExternalStoragePublicDirectory(DIRECTORY_DOCUMENTS)
                             .toString(),
                     FilenameUtils.getBaseName(fileUri) + "_enc",
                     fileUri);
 
                 buffer = encryptFile(privy);
-                fos = new FileOutputStream(f);
+                fos = new FileOutputStream(f1);
                 fos.write(buffer);
                 fos.close();
 
-                f = createFileDuplicate(
+                File f2 = createFileDuplicate(
                         Environment.getExternalStoragePublicDirectory(DIRECTORY_DOCUMENTS)
                                 .toString(),
                         FilenameUtils.getBaseName(fileUri) + "_dec",
                         fileUri);
 
-                buffer = decryptFile(privy);
-                fos = new FileOutputStream(f);
+                buffer = decryptFile(f1);
+                fos = new FileOutputStream(f2);
                 fos.write(buffer);
                 fos.close();
+
             } catch(Exception e){
                 Log.w("error", e.toString());
             }
