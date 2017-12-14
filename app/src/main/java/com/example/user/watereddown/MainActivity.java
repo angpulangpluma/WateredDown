@@ -244,13 +244,47 @@ public class MainActivity extends AppCompatActivity {
             filePath = strings[1];
             Log.w("file", fileUri);
             Log.w("path", filePath);
-            File f = createFileDuplicate(
+
+            try {
+                File privy = new File(getFilesDir(), FilenameUtils.getBaseName(fileUri) + "_new."
+                        + FilenameUtils.getExtension(fileUri));
+                if (!privy.exists())
+                    privy.createNewFile();
+
+                FileOutputStream fos = openFileOutput(privy.getName(), Context.MODE_PRIVATE);
+                FileInputStream fin = new FileInputStream(filePath);
+                byte[] buffer = new byte[(int)(new File(filePath).length())];
+                if(fin.read(buffer) != -1){
+                    Log.w("fin", "yes");
+                    fos.write(buffer);
+                } Log.w("fin", "no");
+                fin.close();
+                fos.close();
+
+                File f = createFileDuplicate(
                     Environment.getExternalStoragePublicDirectory(DIRECTORY_DOCUMENTS)
                             .toString(),
-                    FilenameUtils.getBaseName(fileUri)+"_new",
+                    FilenameUtils.getBaseName(fileUri) + "_enc",
                     fileUri);
-            encryptFile(f);
-            decryptFile(f);
+
+                buffer = encryptFile(privy);
+                fos = new FileOutputStream(f);
+                fos.write(buffer);
+                fos.close();
+
+                f = createFileDuplicate(
+                        Environment.getExternalStoragePublicDirectory(DIRECTORY_DOCUMENTS)
+                                .toString(),
+                        FilenameUtils.getBaseName(fileUri) + "_dec",
+                        fileUri);
+
+                buffer = decryptFile(privy);
+                fos = new FileOutputStream(f);
+                fos.write(buffer);
+                fos.close();
+            } catch(Exception e){
+                Log.w("error", e.toString());
+            }
 //            drpBxManager.init();
 //            try{
 //                drpBxManager.uploadFileToDropBox(fileUri, filePath);
@@ -271,12 +305,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void encryptFile(File f){
-        master.encryptFile(f);
+    private byte[] encryptFile(File f){
+        return master.encryptFile(f);
     }
 
-    private void decryptFile(File f){
-        master.decryptFile(f);
+    private byte[] decryptFile(File f){
+        return master.decryptFile(f);
     }
 
     private aes cryptoInit(File set) {
