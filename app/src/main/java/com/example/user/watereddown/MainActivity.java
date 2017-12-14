@@ -248,8 +248,10 @@ public class MainActivity extends AppCompatActivity {
             try {
                 File privy = new File(getFilesDir(), FilenameUtils.getBaseName(fileUri) + "_new."
                         + FilenameUtils.getExtension(fileUri));
-                if (!privy.exists())
+                if (!privy.exists()){
+                    Log.w("privy?", "yes");
                     privy.createNewFile();
+                } else Log.w("privy?", "no");
 
                 FileOutputStream fos = openFileOutput(privy.getName(), Context.MODE_PRIVATE);
                 FileInputStream fin = new FileInputStream(filePath);
@@ -264,7 +266,7 @@ public class MainActivity extends AppCompatActivity {
                 File f = createFileDuplicate(
                     Environment.getExternalStoragePublicDirectory(DIRECTORY_DOCUMENTS)
                             .toString(),
-                    FilenameUtils.getBaseName(fileUri) + "_enc",
+                    FilenameUtils.getBaseName(filePath) + "_enc",
                     fileUri);
 
                 buffer = encryptFile(privy);
@@ -275,7 +277,7 @@ public class MainActivity extends AppCompatActivity {
                 f = createFileDuplicate(
                         Environment.getExternalStoragePublicDirectory(DIRECTORY_DOCUMENTS)
                                 .toString(),
-                        FilenameUtils.getBaseName(fileUri) + "_dec",
+                        FilenameUtils.getBaseName(filePath) + "_dec",
                         fileUri);
 
                 buffer = decryptFile(privy);
